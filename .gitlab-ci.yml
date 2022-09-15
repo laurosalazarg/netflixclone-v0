@@ -1,0 +1,35 @@
+variables:
+  DOCKER_HOST: tcp://localhost:2375
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+stages:
+  - docker-build
+  - deploy
+
+docker-build:
+  stage: docker-build
+  image: docker:latest
+  services: 
+    - name: docker:19.03.8-dind
+  before_script:
+    - dind docker daemon --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=vf &
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin
+    - docker info
+  script:
+    - docker build -t laurosg87/cdn-react-web .
+    - docker push laurosg87/cdn-react-web:latest
+
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:latest 
+  script:
+  - ls -la /builds/laurosg/cdn-project-react-web/
+  - cp ./config ~/.kube/config
+  - kubectl config set-credentials clusterAdmin_cdn_eastus_cdn_k8eastus --kubeconfig=config
+  - kubectl config --kubeconfig=config set-context cdn_k8eastus-admin 
+  - kubectl config use-context "cdn_k8eastus-admin" --namespace=ingress-nginx --kubeconfig=config 
+  - kubectl config get-contexts --kubeconfig=config 
+  - kubectl config set-context --current --namespace="ingress-nginx" --kubeconfig=config 
+  - kubectl cluster-info
+  - kubectl delete -f website.yaml ; kubectl apply -f website.yaml

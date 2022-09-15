@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-headers
+  namespace: ingress-nginx
+data:
+  X-Different-Name: "true"
+  X-Request-Start: t=${msec}
+  X-Using-Nginx-Controller: "true"
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+data:
+  add-headers: "ingress-nginx/custom-headers"
+  # proxy-set-headers: "ingress-nginx/custom-headers"

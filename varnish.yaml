@@ -1,0 +1,18 @@
+apiVersion: caching.ibm.com/v1alpha1
+kind: VarnishCluster
+metadata:
+  labels:
+    operator: varnish
+    namespace: ingress-nginx
+  name: varnish-cluster
+spec:
+  vcl:
+    configMapName: vcl-config
+    entrypointFileName: entrypoint.vcl
+  backend:
+    port: 3000
+    selector:
+      app: "website"
+  service:
+    port: 80
+    type: LoadBalancer

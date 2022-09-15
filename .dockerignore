@@ -1,0 +1,11 @@
+.dockerignore
+Dockerfile
+README.md
+
+*/node_modules/*
+*/npm-debug.log
+
+./*.yaml
+./*.pdf
+./*.psd
+./*.vcl
